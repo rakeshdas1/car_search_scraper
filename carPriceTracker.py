@@ -34,6 +34,8 @@ class Car_hertz(object):
         self.listed_name = vehicle_html.find('span', class_="inventory-title").find('a').string
         self.url = self.hertz_url_prefix + vehicle_html.find('span', class_="inventory-title").find('a').get('href')
         self.city = vehicle_html.get('data-city')
+    def __str__(self):
+        return '%s,%s,%s,%s,%s,%s,%s,%s,%s' %(self.url, self.manufacturer, self.model, self.model_year, self.price, self.color, self.listed_name, self.mileage, self.available)
 def init_db():
     conn = sql.connect('cars.db')
     cursor = conn.cursor()
@@ -44,13 +46,14 @@ def init_db():
 def insert_car_into_db(car):
     conn = sql.connect('cars.db')
     cursor = conn.cursor()
-    print(f'Inserting {car} into db...')
+    print(f"Inserting {car} into db...")
     insert_arlington_sql = 'INSERT INTO toyota_arlington_cars (stock_id, manufacturer, model, model_year, price, color, listed_name, mileage, date_saved) VALUES (?,?,?,?,?,?,?,?,?)'
     cursor.execute(insert_arlington_sql, (car.stock_num, car.manufacturer, car.model, car.model_year, car.price, car.color, car.listed_name, car.mileage, datetime.datetime.now()))
     conn.commit()
 def insert_hertz_car_into_db(car):
     conn = sql.connect('cars.db')
     cursor = conn.cursor()
+    print(f"Inserting {car} into db...")
     insert_hertz_sql = 'INSERT INTO hertz_cars (url, manufacturer, model, model_year, price, color, listed_name, mileage, available, city, date_saved) VALUES (?,?,?,?,?,?,?,?,?,?,?)'
     cursor.execute(insert_hertz_sql, (car.url, car.manufacturer, car.model, car.model_year, car.price, car.color, car.listed_name, car.mileage, car.available, car.city, datetime.datetime.now()))
     conn.commit()
@@ -80,7 +83,7 @@ def parse_results_page_hertz(results_html):
 def parse_results_page_toyota_arlington(results_html):
     result_list = results_html.find(class_='vehicles')
     vehicles = result_list.find_all(class_='vehicle-container')
-    print(f'Found {len(vehicles)} vehicles on the search page, parsing...')
+    print(f"Found {len(vehicles)} vehicles on the search page, parsing...")
     for vehicle in vehicles:
         curr_car = Car_arlington(vehicle)
         insert_car_into_db(curr_car)
